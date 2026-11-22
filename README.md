@@ -1,8 +1,8 @@
-# 🤖 Chocobot WhatsApp Bot
+# 🤖 Kyoto WhatsApp Bot
 
-Bot de WhatsApp modular construido sobre **Node.js** utilizando [`@whiskeysockets/baileys`](https://github.com/WhiskeySockets/Baileys).
+Bot de WhatsApp modular, ligero y estable construido sobre **Node.js** utilizando [`@whiskeysockets/baileys`](https://github.com/WhiskeySockets/Baileys).
 
-En estado beta y fork directo de KyotoBot (https://github.com/kyr3-fxp/KyotoBot)
+Diseñado específicamente para evitar los problemas habituales de instalación en Windows (sin descargas pesadas de Chromium, sin Puppeteer y con bajo consumo de memoria RAM).
 
 ---
 
@@ -27,12 +27,24 @@ En estado beta y fork directo de KyotoBot (https://github.com/kyr3-fxp/KyotoBot)
 
 ## 📦 Instalación
 
-1. Abre una terminal en la carpeta raiz del bot:
+1. Abre una terminal (PowerShell o CMD) en la carpeta del proyecto y ejecuta:
    ```bash
-   node index.js
+   npm install
    ```
 
 ---
+
+## 🏃 Modo de Uso
+
+### Iniciar el bot:
+```bash
+npm start
+```
+
+### Modo desarrollo (recarga automática al editar código):
+```bash
+npm run dev
+```
 
 ### Vincular WhatsApp:
 1. Al ejecutar por primera vez, verás un código QR en la consola.
@@ -41,7 +53,23 @@ En estado beta y fork directo de KyotoBot (https://github.com/kyr3-fxp/KyotoBot)
 
 ---
 
-## (DESACTUALIZADO) 📜 Lista Completa de Comandos (Prefijo `.`)
+## ☁️ Desplegar en Render con Docker
+
+El repositorio incluye `Dockerfile` y `render.yaml` para desplegar Kyoto como un **Background Worker**. Este bot no necesita un servidor web ni un puerto abierto.
+
+1. Sube el repositorio a GitHub sin incluir `auth_info/` ni archivos `.env`.
+2. En Render, crea un **Blueprint** conectado a ese repositorio y aplica la configuración de `render.yaml`.
+3. Cuando Render solicite `BOT_PHONE`, introduce el número de WhatsApp del bot con código de país, solo dígitos (por ejemplo, `573001234567`).
+4. Espera a que termine el primer despliegue y abre los registros del servicio. Copia el código de vinculación que imprime el bot y confírmalo en WhatsApp: **Dispositivos vinculados → Vincular un dispositivo → Vincular con el número de teléfono**.
+5. Comprueba en los registros que aparezca el mensaje de conexión establecida.
+
+El disco persistente de Render guarda `auth_info/` y `data/` bajo `/var/data`, para conservar la sesión de WhatsApp y los datos del bot entre reinicios y despliegues. El servicio configurado usa el plan Starter porque Render requiere un plan de pago para adjuntar un disco persistente. Mantén una sola instancia del worker para evitar que dos conexiones usen la misma sesión.
+
+No compartas el código de vinculación ni copies `auth_info/` al repositorio. Si el servicio pierde su disco, habrá que vincular WhatsApp de nuevo.
+
+---
+
+## 📜 Lista Completa de Comandos (Prefijo `!`)
 
 ### 🎮 Entretenimiento e Interacción (Juegos y Economía)
 | Comando | Alias | Descripción |

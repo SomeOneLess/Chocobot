@@ -1,3 +1,4 @@
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,6 +15,52 @@ export class MessageHandler {
   constructor(options = {}) {
     this.prefix = options.prefix || '.';
     this.commands = new Map();
+
+    // Evita ejecutar dos veces el mismo comando si Baileys repite un upsert.
+    this.processedMessages = new Map();
+    this.processedMessageTtlMs = 24 * 60 * 60 * 1000; // 24 horas
+    this.maxProcessedMessages = 10000;
+    this.processedMessagesSinceCleanup = 0;
+  }
+
+  isDuplicateCommand(msg) {
+    const remoteJid = msg?.key?.remoteJid;
+    const messageId = msg?.key?.id;
+
+    // Sin chat o ID no hay una clave fiable para deduplicar.
+    if (!remoteJid || !messageId) return false;
+
+    const cacheKey = `${remoteJid}:${messageId}`;
+    const now = Date.now();
+    const previousTimestamp = this.processedMessages.get(cacheKey);
+
+    if (
+      previousTimestamp !== undefined &&
+      now - previousTimestamp < this.processedMessageTtlMs
+    ) {
+      return true;
+    }
+
+    this.processedMessages.set(cacheKey, now);
+    this.processedMessagesSinceCleanup++;
+
+    if (
+      this.processedMessagesSinceCleanup >= 100 ||
+      this.processedMessages.size > this.maxProcessedMessages
+    ) {
+      this.processedMessagesSinceCleanup = 0;
+
+      for (const [key, timestamp] of this.processedMessages) {
+        const expired = now - timestamp >= this.processedMessageTtlMs;
+        const overLimit = this.processedMessages.size > this.maxProcessedMessages;
+
+        if (expired || overLimit) {
+          this.processedMessages.delete(key);
+        }
+      }
+    }
+
+    return false;
   }
 
   async loadCommands() {
@@ -221,6 +268,13 @@ export class MessageHandler {
         const command = this.commands.get(lowerCmdName);
         if (!command) continue;
 
+        // Se registra antes de cualquier await posterior: así dos eventos
+        // simultáneos del mismo mensaje no pueden ejecutar el comando dos veces.
+        if (this.isDuplicateCommand(msg)) {
+          console.log(`[Comando duplicado omitido] "${command.name}" (${remoteJid}, ${msg.key.id})`);
+          continue;
+        }
+
         if (command.category === 'nsfw' || command.category === 'roleplay') {
           if (isGroup) {
             const groupConfig = db.getGroup(remoteJid);
@@ -300,7 +354,9 @@ export class MessageHandler {
               await sock.sendMessage(remoteJid, {
                 text: `❌ Ocurrió un error al procesar el comando *${command.name}*.`
               });
-            } catch (e) {}
+            } catch (sendError) {
+              console.error('[No se pudo enviar el aviso de error del comando]', sendError);
+            }
           }
         }
       }
