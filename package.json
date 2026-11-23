@@ -1,7 +1,7 @@
 {
-  "name": "kyoto-whatsapp-bot",
-  "version": "1.0.0",
-  "description": "Bot de WhatsApp estable y modular con Node.js y Baileys",
+  "name": "Chocobot",
+  "version": "0.8.0",
+  "description": "Bot de WhatsApp  modular con Node.js y Baileys",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
