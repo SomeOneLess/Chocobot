@@ -1,8 +1,8 @@
-# 🤖 Kyoto WhatsApp Bot
+# 🍫 Chocobot
 
-Bot de WhatsApp modular, ligero y estable construido sobre **Node.js** utilizando [`@whiskeysockets/baileys`](https://github.com/WhiskeySockets/Baileys).
+Bot de WhatsApp modular y ligero construido sobre **Node.js** utilizando [`@whiskeysockets/baileys`](https://github.com/WhiskeySockets/Baileys).
 
-Diseñado específicamente para evitar los problemas habituales de instalación en Windows (sin descargas pesadas de Chromium, sin Puppeteer y con bajo consumo de memoria RAM).
+Fork directo de [`KyotoBot`](https://github.com/kyr3-fxp/KyotoBot), modificado para usar directamente sobre linux.
 
 ---
 
@@ -27,9 +27,11 @@ Diseñado específicamente para evitar los problemas habituales de instalación 
 
 ## 📦 Instalación
 
-1. Abre una terminal (PowerShell o CMD) en la carpeta del proyecto y ejecuta:
+1. Abre una terminal en la carpeta del proyecto y ejecuta:
    ```bash
    npm install
+   sudo apt update && sudo apt install -y ffmpeg
+   npm install google-tts-api
    ```
 
 ---
@@ -38,12 +40,7 @@ Diseñado específicamente para evitar los problemas habituales de instalación 
 
 ### Iniciar el bot:
 ```bash
-npm start
-```
-
-### Modo desarrollo (recarga automática al editar código):
-```bash
-npm run dev
+node index.js
 ```
 
 ### Vincular WhatsApp:
@@ -53,61 +50,45 @@ npm run dev
 
 ---
 
-## ☁️ Desplegar en Render con Docker
-
-El repositorio incluye `Dockerfile` y `render.yaml` para desplegar Kyoto como un **Background Worker**. Este bot no necesita un servidor web ni un puerto abierto.
-
-1. Sube el repositorio a GitHub sin incluir `auth_info/` ni archivos `.env`.
-2. En Render, crea un **Blueprint** conectado a ese repositorio y aplica la configuración de `render.yaml`.
-3. Cuando Render solicite `BOT_PHONE`, introduce el número de WhatsApp del bot con código de país, solo dígitos (por ejemplo, `573001234567`).
-4. Espera a que termine el primer despliegue y abre los registros del servicio. Copia el código de vinculación que imprime el bot y confírmalo en WhatsApp: **Dispositivos vinculados → Vincular un dispositivo → Vincular con el número de teléfono**.
-5. Comprueba en los registros que aparezca el mensaje de conexión establecida.
-
-El disco persistente de Render guarda `auth_info/` y `data/` bajo `/var/data`, para conservar la sesión de WhatsApp y los datos del bot entre reinicios y despliegues. El servicio configurado usa el plan Starter porque Render requiere un plan de pago para adjuntar un disco persistente. Mantén una sola instancia del worker para evitar que dos conexiones usen la misma sesión.
-
-No compartas el código de vinculación ni copies `auth_info/` al repositorio. Si el servicio pierde su disco, habrá que vincular WhatsApp de nuevo.
-
----
-
-## 📜 Lista Completa de Comandos (Prefijo `!`)
+## (DESACTUALIZADO) 📜 Lista Completa de Comandos (Prefijo `.`)
 
 ### 🎮 Entretenimiento e Interacción (Juegos y Economía)
 | Comando | Alias | Descripción |
 | :--- | :--- | :--- |
-| `!work` | `!trabajar`, `!chambear` | Trabaja para ganar monedas del bot y subir de nivel (cooldown 15 min). |
-| `!bal` | `!cartera`, `!saldo` | Muestra tu saldo en mano, banco, nivel y experiencia. |
-| `!rob @usuario` | `!robar` | Intenta robar una parte del saldo de otro usuario (45% éxito / multa). |
-| `!pay @usuario <monto>` | `!pagar` | Transfiere monedas de tu cartera a otro miembro. |
-| `!top` | `!lb`, `!ricos` | Tabla de clasificación de los usuarios más ricos del grupo. |
-| `!slot <monto>` | `!tragamonedas` | Tragamonedas clásico animado con multiplicadores x2, x5 y x10. |
-| `!roulette <color> <monto>` | `!ruleta` | Ruleta de casino (rojo/negro pagan x2, verde x14). |
-| `!ppt <opción> [monto]` | `!rps` | Piedra, papel o tijera contra el bot (con apuesta opcional). |
-| `!ttt @usuario` | `!gato` | Partida interactiva de Tres en Raya con tablero (1️⃣-9️⃣). Usa `!ttt <1-9>`. |
-| `!connect4 @usuario` | `!c4` | Desafío interactivo de Conecta 4 (🔴🟡). Usa `!connect4 <1-7>`. |
+| `.work` | `.trabajar`, `.chambear` | Trabaja para ganar monedas del bot y subir de nivel (cooldown 15 min). |
+| `.bal` | `.cartera`, `.saldo` | Muestra tu saldo en mano, banco, nivel y experiencia. |
+| `.rob @usuario` | `.robar` | Intenta robar una parte del saldo de otro usuario (45% éxito / multa). |
+| `.pay @usuario <monto>` | `.pagar` | Transfiere monedas de tu cartera a otro miembro. |
+| `.top` | `.lb`, `.ricos` | Tabla de clasificación de los usuarios más ricos del grupo. |
+| `.slot <monto>` | `.tragamonedas` | Tragamonedas clásico animado con multiplicadores x2, x5 y x10. |
+| `.roulette <color> <monto>` | `.ruleta` | Ruleta de casino (rojo/negro pagan x2, verde x14). |
+| `.ppt <opción> [monto]` | `.rps` | Piedra, papel o tijera contra el bot (con apuesta opcional). |
+| `.ttt @usuario` | `.gato` | Partida interactiva de Tres en Raya con tablero (1️⃣-9️⃣). Usa `.ttt <1-9>`. |
+| `.connect4 @usuario` | `.c4` | Desafío interactivo de Conecta 4 (🔴🟡). Usa `.connect4 <1-7>`. |
 
 ---
 
 ### 🛠️ Utilidades y Herramientas Multimedia
 | Comando | Alias | Descripción |
 | :--- | :--- | :--- |
-| `!s` | `!sticker` | Convierte una imagen, GIF o video corto en un sticker de WhatsApp. |
-| `!toimg` | `!toimage` | Convierte un sticker estático de vuelta a formato de imagen PNG. |
-| `!tovideo` | `!tomp4` | Convierte un sticker animado en un video MP4 reproducible. |
-| `!getpp [@usuario]` | `!perfil`, `!pfp` | Obtiene la foto de perfil en alta resolución del usuario citado, mencionado o propio. |
-| `!undel` | `!undelete`, `!recuperar` | Muestra un mensaje eliminado (citándolo o el último borrado) con mención al autor. |
-| `!r` | `!vv`, `!viewonce` | Revela y reenvía fotos, videos o audios de "Ver una sola vez" al citarlos. |
-| `!status` | `!estado` | Descarga y reenvía el contenido de un estado/historia citado (texto o multimedia). |
-| `!playaudio <canción>` | `!playmp3`, `!ytaudio` | Busca una canción y envía su carátula y descripción corta, seguida del audio MP3. |
-| `!play <nombre/link>` | `!musica` | Busca una canción en YouTube y muestra su información y opciones de audio. |
-| `!video <nombre/link>` | `!ytvideo` | Busca un video en YouTube y genera ficha y descarga en alta resolución. |
-| `!ytmp3 <link>` | `!ytmp4` | Genera enlaces de descarga directa para audio o video de YouTube. |
-| `!tiktok <link>` | `!tt` | Descarga videos de TikTok sin marca de agua en resolución completa. |
-| `!ig <link>` | `!instagram` | Descarga publicaciones o Reels públicos de Instagram. |
-| `!ia <pregunta>` | `!gpt` | Consulta directa al modelo de inteligencia artificial (Pollinations AI). |
-| `!imagine <prompt>` | `!dall-e` | Genera imágenes artísticas y realistas a partir de descripciones de texto. |
-| `!pnt <descripción>` | — | Busca en Pinterest (`PINTEREST_ACCESS_TOKEN`), luego en otras fuentes; si no hay resultados, intenta generarla con IA. |
-| `!shazam` | `!song` | Identifica canciones respondiendo a notas de voz, audios o videos. |
-| `!rembg` | `!quitarfondo` | Remueve automáticamente el fondo de una imagen y genera un sticker transparente. |
+| `.s` | `.sticker` | Convierte una imagen, GIF o video corto en un sticker de WhatsApp. |
+| `.toimg` | `.toimage` | Convierte un sticker estático de vuelta a formato de imagen PNG. |
+| `.tovideo` | `.tomp4` | Convierte un sticker animado en un video MP4 reproducible. |
+| `.getpp [@usuario]` | `.perfil`, `.pfp` | Obtiene la foto de perfil en alta resolución del usuario citado, mencionado o propio. |
+| `.undel` | `.undelete`, `.recuperar` | Muestra un mensaje eliminado (citándolo o el último borrado) con mención al autor. |
+| `.r` | `.vv`, `.viewonce` | Revela y reenvía fotos, videos o audios de "Ver una sola vez" al citarlos. |
+| `.status` | `.estado` | Descarga y reenvía el contenido de un estado/historia citado (texto o multimedia). |
+| `.playaudio <canción>` | `.playmp3`, `.ytaudio` | Busca una canción y envía su carátula y descripción corta, seguida del audio MP3. |
+| `.play <nombre/link>` | `.musica` | Busca una canción en YouTube y muestra su información y opciones de audio. |
+| `.video <nombre/link>` | `.ytvideo` | Busca un video en YouTube y genera ficha y descarga en alta resolución. |
+| `.ytmp3 <link>` | `.ytmp4` | Genera enlaces de descarga directa para audio o video de YouTube. |
+| `.tiktok <link>` | `.tt` | Descarga videos de TikTok sin marca de agua en resolución completa. |
+| `.ig <link>` | `.instagram` | Descarga publicaciones o Reels públicos de Instagram. |
+| `.ia <pregunta>` | `.gpt` | Consulta directa al modelo de inteligencia artificial (Pollinations AI). |
+| `.imagine <prompt>` | `.dall-e` | Genera imágenes artísticas y realistas a partir de descripciones de texto. |
+| `.pnt <descripción>` | — | Busca en Pinterest (`PINTEREST_ACCESS_TOKEN`), luego en otras fuentes; si no hay resultados, intenta generarla con IA. |
+| `.shazam` | `.song` | Identifica canciones respondiendo a notas de voz, audios o videos. |
+| `.rembg` | `.quitarfondo` | Remueve automáticamente el fondo de una imagen y genera un sticker transparente. |
 
 ---
 
@@ -115,71 +96,53 @@ No compartas el código de vinculación ni copies `auth_info/` al repositorio. S
 *(Requieren que el usuario y el bot sean administradores)*
 | Comando | Alias | Descripción |
 | :--- | :--- | :--- |
-| `!kick @usuario` | `!ban` | Expulsa a un usuario del grupo. |
-| `!add <número>` | `!agregar` | Agrega un miembro al grupo mediante su número internacional. |
-| `!promote @usuario` | `!promover` | Otorga permisos de administrador a un miembro. |
-| `!demote @usuario` | `!degradar` | Revoca los permisos de administrador a un miembro. |
-| `!grupo <cerrar\|abrir>` | `!group` | `cerrar`: solo admins pueden escribir. `abrir`: todos pueden escribir. |
-| `!link` | `!enlace` | Muestra el enlace de invitación del grupo. |
-| `!revoke` | `!restablecer` | Restablece el enlace de invitación invalidando el anterior. |
-| `!tagall [mensaje]` | `!todos` | Mención visible e invocación a todos los integrantes del grupo. |
-| `!hidetag <mensaje>` | `!notificar` | Notifica a todos los integrantes sin mostrar las menciones en el texto. |
-| `!spam <1-50> <mensaje>` | `!repetirhidetag` | Repite un hidetag el número indicado de veces sin pausa entre mensajes. |
-| `!warn @usuario` | `!advertir` | Aplica una advertencia (al acumular 3 advertencias el bot lo expulsa). |
-| `!unwarn @usuario` | `!quitaraviso` | Remueve una advertencia registrada. |
-| `!mute @usuario` | `!unmute` | Silencia a un miembro (sus mensajes en el grupo son eliminados por el bot). |
-| `!antilink <on\|off>` | `!antienlace` | Elimina mensajes con enlaces de grupos enviados por no-administradores. |
-| `!welcome <on\|off>` | `!bienvenida` | Envía mensaje de bienvenida automático cuando ingresa un nuevo miembro. |
+| `.kick @usuario` | `.ban` | Expulsa a un usuario del grupo. |
+| `.add <número>` | `.agregar` | Agrega un miembro al grupo mediante su número internacional. |
+| `.promote @usuario` | `.promover` | Otorga permisos de administrador a un miembro. |
+| `.demote @usuario` | `.degradar` | Revoca los permisos de administrador a un miembro. |
+| `.grupo <cerrar\|abrir>` | `.group` | `cerrar`: solo admins pueden escribir. `abrir`: todos pueden escribir. |
+| `.link` | `.enlace` | Muestra el enlace de invitación del grupo. |
+| `.revoke` | `.restablecer` | Restablece el enlace de invitación invalidando el anterior. |
+| `.tagall [mensaje]` | `.todos` | Mención visible e invocación a todos los integrantes del grupo. |
+| `.hidetag <mensaje>` | `.notificar` | Notifica a todos los integrantes sin mostrar las menciones en el texto. |
+| `.spam <1-50> <mensaje>` | `.repetirhidetag` | Repite un hidetag el número indicado de veces sin pausa entre mensajes. |
+| `.warn @usuario` | `.advertir` | Aplica una advertencia (al acumular 3 advertencias el bot lo expulsa). |
+| `.unwarn @usuario` | `.quitaraviso` | Remueve una advertencia registrada. |
+| `.mute @usuario` | `.unmute` | Silencia a un miembro (sus mensajes en el grupo son eliminados por el bot). |
+| `.antilink <on\|off>` | `.antienlace` | Elimina mensajes con enlaces de grupos enviados por no-administradores. |
+| `.welcome <on\|off>` | `.bienvenida` | Envía mensaje de bienvenida automático cuando ingresa un nuevo miembro. |
 
 ---
 
 ### 🔞 Comandos NSFW de Catálogo +18
-*(Requieren activación previa con `!nsfw on` por parte de un administrador)*
+*(Requieren activación previa con `.nsfw on` por parte de un administrador)*
 | Comando | Alias | Descripción |
 | :--- | :--- | :--- |
-| `!nsfw <on\|off>` | `!+18` | Activa o desactiva la categoría para adultos en el grupo actual. |
-| `!hentai` | `!anime18` | Envía imágenes de arte anime NSFW aleatorias de alta resolución. |
-| `!waifu [nsfw]` | `!waifunsfw` | Variantes de waifus en categorías adultas. |
-| `!real` | `!cosplay18` | Fotografía y cosplay de catálogo general para adultos. |
-| `!pack` | `!galeria18` | Envía un recurso multimedia aleatorio de la categoría para adultos. |
-| `!rule34 <etiqueta>` | `!r34` | Búsqueda por etiquetas o personajes en repositorios booru. |
-| `!ecchi` | `!erotico` | Imágenes de tono sugerente o erótico suave. |
-| `!nsfwsticker` | `!stickernsfw` | Convierte contenido NSFW directamente a sticker de WhatsApp. |
+| `.nsfw <on\|off>` | `.+18` | Activa o desactiva la categoría para adultos en el grupo actual. |
+| `.hentai` | `.anime18` | Envía imágenes de arte anime NSFW aleatorias de alta resolución. |
+| `.waifu [nsfw]` | `.waifunsfw` | Variantes de waifus en categorías adultas. |
+| `.real` | `.cosplay18` | Fotografía y cosplay de catálogo general para adultos. |
+| `.pack` | `.galeria18` | Envía un recurso multimedia aleatorio de la categoría para adultos. |
+| `.rule34 <etiqueta>` | `.r34` | Búsqueda por etiquetas o personajes en repositorios booru. |
+| `.ecchi` | `.erotico` | Imágenes de tono sugerente o erótico suave. |
+| `.nsfwsticker` | `.stickernsfw` | Convierte contenido NSFW directamente a sticker de WhatsApp. |
 
 ---
 
 ### 🔥 Comandos de Interacción y Rol +18 (Entre Usuarios)
-*(Requieren `!nsfw on` y mencionar obligatoriamente a otro usuario)*
+*(Requieren `.nsfw on` y mencionar obligatoriamente a otro usuario)*
 | Comando | Alias | Acción Contextual Generada |
 | :--- | :--- | :--- |
-| `!strip @usuario` | `!desvestir` | 🔥 *@A le ha quitado una prenda seductoramente a @B* 👗 |
-| `!touch @usuario` | `!manosear` | 🔥 *@A ha tocado y acariciado con audacia a @B* ✋ |
-| `!slapnsfw @usuario` | `!azotensfw` | 🔥 *@A le ha propinado una palmada explícita en las caderas a @B* 🍑 |
-| `!spank @usuario` | `!azotar` | 🔥 *@A ha castigado con un azote a @B* 💥 |
-| `!suck @usuario` | `!oral` | 🔥 *@A le está realizando sexo oral apasionadamente a @B* 🫦 |
-| `!fuck @usuario` | `!penetrate` | 🔥 *@A ha tomado en una sesión íntima y desenfrenada a @B* 🔞 |
-| `!cum @usuario` | `!venirse` | 🔥 *@A ha culminado intensamente sobre @B* 💦 |
-| `!lick @usuario` | `!lamer` | 🔥 *@A ha recorrido eróticamente con su lengua a @B* 👅 |
-| `!bite @usuario` | `!morder` | 🔥 *@A le ha dado una mordida sugerente y excitante a @B* 👄 |
-| `!grope @usuario` | `!agarrar` | 🔥 *@A ha agarrado impulsivamente las zonas prohibidas de @B* 😈 |
-| `!bondage @usuario` | `!atar` | 🔥 *@A ha atado e inmovilizado en la cama a @B* ⛓️ |
-| `!grind @usuario` | `!rozar` | 🔥 *@A se ha frotado íntima y apasionadamente contra @B* 🥵 |
-| `!bed @usuario` | `!cama` | 🔥 *@A ha llevado directo a la cama a @B* 🛏️ |
-
----
-
-## 🛠️ Solución de Problemas Comunes en Windows
-
-### 1. Error de Política de Ejecución en PowerShell (`ps1 cannot be loaded`)
-Si PowerShell bloquea scripts, ejecuta en una ventana de PowerShell como Administrador:
-```powershell
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-### 2. "¿Cómo reiniciar la sesión para escanear un nuevo QR?"
-1. Detén el bot (`Ctrl + C`).
-2. Elimina la carpeta `auth_info`:
-   ```powershell
-   Remove-Item -Recurse -Force auth_info
-   ```
-3. Inicia el bot nuevamente con `npm start`.
+| `.strip @usuario` | `.desvestir` | 🔥 *@A le ha quitado una prenda seductoramente a @B* 👗 |
+| `.touch @usuario` | `.manosear` | 🔥 *@A ha tocado y acariciado con audacia a @B* ✋ |
+| `.slapnsfw @usuario` | `.azotensfw` | 🔥 *@A le ha propinado una palmada explícita en las caderas a @B* 🍑 |
+| `.spank @usuario` | `.azotar` | 🔥 *@A ha castigado con un azote a @B* 💥 |
+| `.suck @usuario` | `.oral` | 🔥 *@A le está realizando sexo oral apasionadamente a @B* 🫦 |
+| `.fuck @usuario` | `.penetrate` | 🔥 *@A ha tomado en una sesión íntima y desenfrenada a @B* 🔞 |
+| `.cum @usuario` | `.venirse` | 🔥 *@A ha culminado intensamente sobre @B* 💦 |
+| `.lick @usuario` | `.lamer` | 🔥 *@A ha recorrido eróticamente con su lengua a @B* 👅 |
+| `.bite @usuario` | `.morder` | 🔥 *@A le ha dado una mordida sugerente y excitante a @B* 👄 |
+| `.grope @usuario` | `.agarrar` | 🔥 *@A ha agarrado impulsivamente las zonas prohibidas de @B* 😈 |
+| `.bondage @usuario` | `.atar` | 🔥 *@A ha atado e inmovilizado en la cama a @B* ⛓️ |
+| `.grind @usuario` | `.rozar` | 🔥 *@A se ha frotado íntima y apasionadamente contra @B* 🥵 |
+| `.bed @usuario` | `.cama` | 🔥 *@A ha llevado directo a la cama a @B* 🛏️ |
